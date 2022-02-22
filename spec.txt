@@ -1,0 +1,16 @@
+Header:
+
+0x00 - 4 bytes - Magic/signature (SPBD in our case)
+0x04 - u32 - Version (0x33 in our case)
+0x08 - u32 - Number of emitter sets (?)
+0x0C - u32 - Padding??
+0x10 - u32 - Offset to effect name table
+0x14 - u32 - Offset to texture block table
+0x18 - u32 - Size of texture block table
+
+Header (versions 0xB onwards):
+0x1C - u32 - Offset to "shader gtx table"
+0x20 - u32 - Size of "shader gtx table"
+0x24 - u32 - Offset to key animation table
+0x28 - u32 - Size of keyanimation table
+(To be continued)
