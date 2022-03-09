@@ -13,4 +13,12 @@ Header (versions 0xB onwards):
 0x20 - u32 - Size of "shader gtx table"
 0x24 - u32 - Offset to key animation table
 0x28 - u32 - Size of keyanimation table
+0x2C - u32 - Offset to "primative table"
+0x30 - u32 - Size of "primative table"
+0x34 - u32 - Offset to shader parameter table
+0x38 - u32 - Size of shader parameter table
+0x3C - u32 - Total size of the texture table
+0x40 - u64 - Unknown
+
+Emitter sets:
 (To be continued)
