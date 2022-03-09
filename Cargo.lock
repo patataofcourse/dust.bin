@@ -3,5 +3,23 @@
 version = 3
 
 [[package]]
+name = "cc"
+version = "1.0.73"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
+
+[[package]]
+name = "ctr_etc1"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7858a4dda82bc52b9c984ae3c59e01d01a332a2155fce8800ed2cab940b72ff"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "dust-bin"
 version = "0.1.0"
+dependencies = [
+ "ctr_etc1",
+]
