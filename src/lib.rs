@@ -7,6 +7,15 @@ pub struct EffectFile {
     pub texture_folder: Vec<Texture>,
 }
 
-pub struct EmitterSet {}
+pub struct EmitterSet {
+    pub name: String,
+    pub unk1: u32,
+    pub unk2: u32,
+    pub description: String, //?
+    pub name_pointer: u32,   //?
+    pub emitters: Vec<Emitter>,
+}
+
+pub struct Emitter {}
 
 pub struct Texture {}
