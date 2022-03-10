@@ -58,52 +58,52 @@ impl EffectFile {
         let texture_table_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
 
         // "Fun" part - stuff that depends on version
-        let shader_gtx_tab_pos = if version > 0xB {
+        let shader_gtx_tab_pos = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let shader_gtx_tab_size = if version > 0xB {
+        let shader_gtx_tab_size = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let keyanim_tab_pos = if version > 0xB {
+        let keyanim_tab_pos = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let keyanim_tab_size = if version > 0xB {
+        let keyanim_tab_size = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let primative_tab_pos = if version > 0xB {
+        let primative_tab_pos = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let primative_tab_size = if version > 0xB {
+        let primative_tab_size = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let shader_param_tab_pos = if version > 0xB {
+        let shader_param_tab_pos = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let shader_param_tab_size = if version > 0xB {
+        let shader_param_tab_size = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let texture_tab_size = if version > 0xB {
+        let texture_tab_size = if version >= 0xB {
             Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
         };
-        let unk = if version > 0xB {
+        let unk = if version >= 0xB {
             Some(u64::read_from(&mut f, ByteOrder::LittleEndian)?)
         } else {
             None
@@ -112,14 +112,17 @@ impl EffectFile {
         let mut emitter_sets = vec![];
         // Emitter sets
         for _ in 0..emitter_count {
+            let description = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let unk1 = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
             let name_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let name = util::read_str_at(&mut f, effect_name_table + name_offset);
+            let name = util::read_str_at(&mut f, (effect_name_table + name_offset) as u64)?;
+            println!("{}", name);
 
             emitter_sets.push(EmitterSet {
                 name,
-                unk1: 0,
+                unk1,
                 unk2: 0,
-                description: 0,
+                description,
                 name_pointer: 0,
                 emitters: vec![],
             })
