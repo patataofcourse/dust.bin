@@ -2,6 +2,7 @@ use bytestream::{ByteOrder, StreamReader};
 use std::{fs::File, io, io::Read, path::PathBuf};
 
 mod etc_dec;
+mod util;
 
 pub struct EffectFile {
     pub version: u32,
@@ -14,8 +15,8 @@ pub struct EmitterSet {
     pub name: String,
     pub unk1: u32,
     pub unk2: u32,
-    pub description: String, //?
-    pub name_pointer: u32,   //?
+    pub description: u32,  //?
+    pub name_pointer: u32, //?
     pub emitters: Vec<Emitter>,
 }
 
@@ -34,9 +35,8 @@ impl EffectFile {
     pub fn from_file(fname: PathBuf) -> io::Result<Self> {
         let mut f = File::open(fname)?;
 
-        let mut magic = [0, 0, 0, 0];
-        f.read(&mut magic)?;
-        if magic != "SPBD".as_bytes() {
+        let magic = util::read_str_sized(&mut f, 4);
+        if magic != "SPBD" {
             println!("Not an SPBD PTCL file");
             return Err(io::Error::from(io::ErrorKind::Other));
         }
@@ -109,10 +109,26 @@ impl EffectFile {
             None
         };
 
+        let mut emitter_sets = vec![];
+        // Emitter sets
+        for _ in 0..emitter_count {
+            let name_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let name = util::read_str_at(&mut f, effect_name_table + name_offset);
+
+            emitter_sets.push(EmitterSet {
+                name,
+                unk1: 0,
+                unk2: 0,
+                description: 0,
+                name_pointer: 0,
+                emitters: vec![],
+            })
+        }
+
         Ok(Self {
             version: version,
             unk,
-            emitter_sets: vec![],
+            emitter_sets,
             texture_folder: vec![],
         })
     }
