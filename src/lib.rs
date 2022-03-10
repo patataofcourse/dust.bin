@@ -1,5 +1,5 @@
 use bytestream::{ByteOrder, StreamReader};
-use std::{fs::File, io, io::Read, path::PathBuf};
+use std::{fs::File, io, path::PathBuf};
 
 mod etc_dec;
 mod util;
@@ -32,13 +32,13 @@ pub enum EmitterUnknownData {
 pub struct Texture {}
 
 impl EffectFile {
-    pub fn from_file(fname: PathBuf) -> io::Result<Self> {
+    pub fn from_file(fname: PathBuf) -> anyhow::Result<Self> {
         let mut f = File::open(fname)?;
 
-        let magic = util::read_str_sized(&mut f, 4);
+        let magic = util::read_str_sized::<4>(&mut f)?;
         if magic != "SPBD" {
             println!("Not an SPBD PTCL file");
-            return Err(io::Error::from(io::ErrorKind::Other));
+            Err(io::Error::from(io::ErrorKind::Other))?;
         }
         let version = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
         if version < 0xB {

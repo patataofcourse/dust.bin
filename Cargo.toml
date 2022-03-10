@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 ctr_etc1 = "0.1.0"
 bytestream = "0.4.0"
+anyhow = "1.0.56"
