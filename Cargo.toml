@@ -6,4 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ctr_etc1="0.1.0"
+ctr_etc1 = "0.1.0"
+bytestream = "0.4.0"

@@ -12,7 +12,7 @@ Extra info in header (versions 0xB onwards):
 0x1C - u32 - Offset to "shader gtx table"
 0x20 - u32 - Size of "shader gtx table"
 0x24 - u32 - Offset to key animation table
-0x28 - u32 - Size of keyanimation table
+0x28 - u32 - Size of key animation table
 0x2C - u32 - Offset to "primative table"
 0x30 - u32 - Size of "primative table"
 0x34 - u32 - Offset to shader parameter table
@@ -35,4 +35,4 @@ Emitter table - repeat per emitter:
 0x04 - 0xC bytes of padding
 
 Emitter:
-0x00 - 56 bytes of data that Switch Toolbox ignores
+0x00 - 56 bytes of data that Switch Toolbox ignores (12 bytes in versions before 0xB)
