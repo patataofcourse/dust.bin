@@ -35,3 +35,4 @@ Emitter table - repeat per emitter:
 0x04 - 0xC bytes of padding
 
 Emitter:
+0x00 - 56 bytes of data that Switch Toolbox ignores

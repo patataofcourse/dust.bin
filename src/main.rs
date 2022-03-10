@@ -1,3 +1,6 @@
+use dust_bin::EffectFile;
+use std::{path::PathBuf, str::FromStr};
+
 fn main() {
-    println!("Hello, world!");
+    let effect = EffectFile::from_file(PathBuf::from_str("test-files/agbQuiz.ptcl").unwrap());
 }
