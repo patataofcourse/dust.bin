@@ -1,5 +1,9 @@
 use bytestream::{ByteOrder, StreamReader};
-use std::{fs::File, io, path::PathBuf};
+use std::{
+    fs::File,
+    io::{self, Seek, SeekFrom},
+    path::PathBuf,
+};
 
 mod etc_dec;
 mod util;
@@ -15,12 +19,13 @@ pub struct EmitterSet {
     pub name: String,
     pub unk1: u32,
     pub unk2: u32,
-    pub description: u32,  //?
-    pub name_pointer: u32, //?
+    pub description: u32,
+    pub name_pointer: u32,
     pub emitters: Vec<Emitter>,
 }
 
 pub struct Emitter {
+    pub unknown_offset: u32,
     pub unk: EmitterUnknownData, // Switch Toolbox ignores this
 }
 
@@ -41,18 +46,15 @@ impl EffectFile {
             Err(io::Error::from(io::ErrorKind::Other))?;
         }
         let version = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+        println!("Version {:#X} ", version);
         if version <= 0xB {
-            println!(
-                "Warning: version {:#X} might not be fully supported",
-                version
-            )
-        } else {
-            println!("Version {:#X} ", version);
+            println!("Warning: version might not be fully supported")
         }
 
         //now here comes a bunch of data we can't use yet
         let emitter_count = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
         let header_padding = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+        println!(" header padding: {:#010X}", header_padding);
         let effect_name_table = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
         let texture_table_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
         let texture_table_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
@@ -121,15 +123,27 @@ impl EffectFile {
             let emitter_table_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
             let unk2 = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
 
+            let pos = f.stream_position()?;
+            f.seek(SeekFrom::Start(emitter_table_pos as u64))?;
+            let mut emitters = vec![];
+            for _ in 0..emitter_count {
+                let emitter_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+                u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
+                let unknown_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+                u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
+            }
+            f.seek(SeekFrom::Start(pos))?;
+
             emitter_sets.push(EmitterSet {
                 name,
                 unk1,
                 unk2,
                 description,
                 name_pointer,
-                emitters: vec![],
+                emitters,
             })
         }
+        println!();
 
         Ok(Self {
             version: version,
