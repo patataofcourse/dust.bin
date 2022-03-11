@@ -32,7 +32,14 @@ Emitter sets (per set):
 
 Emitter table - repeat per emitter:
 0x00 - u32 - Offset to emitter
-0x04 - 0xC bytes of padding
+0x04 - u32 - Padding
+0x08 - u32 - Unknown offset
+0x0C - u32 - Padding
 
 Emitter:
 0x00 - 56 bytes of data that Switch Toolbox ignores (12 bytes in versions before 0xB)
+0x38 - u32 - Name offset (inside the effect name table)
+0x3C - u32 - Padding
+0x40 - u32 - Texture data start here
+
+(this is where things get a lil weird)

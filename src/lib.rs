@@ -31,7 +31,7 @@ pub struct Emitter {
 
 pub enum EmitterUnknownData {
     Old([u8; 0xC]),
-    New([u8; 0x56]),
+    New([u8; 0x38]),
 }
 
 pub struct Texture {}
