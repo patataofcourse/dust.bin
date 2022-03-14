@@ -13,6 +13,7 @@ pub struct EffectFile {
     pub version: u32,
     pub unk: Option<u64>,
     pub emitter_sets: Vec<EmitterSet>,
+    pub textures: Vec<Texture>,
 }
 
 #[derive(Debug)]
@@ -28,7 +29,6 @@ pub struct EmitterSet {
 #[derive(Debug)]
 pub struct Emitter {
     pub name: String,
-    pub unknown_offset: u32,
     pub unk_data: EmitterUnknownData, // Switch Toolbox ignores this
 }
 
@@ -130,11 +130,11 @@ impl EffectFile {
 
             let pos = f.stream_position()?;
             f.seek(SeekFrom::Start(emitter_table_pos.into()))?;
+            println!("g{:#X}", emitter_table_pos);
             let mut emitters = vec![];
             for _ in 0..emitter_count {
                 let emitter_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-                u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
-                let unknown_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+                println!("{:#X}", emitter_pos);
                 u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
 
                 let pos = f.stream_position()?;
@@ -152,15 +152,10 @@ impl EffectFile {
                 }
 
                 let name_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-                let name = util::read_str_at(&mut f, (effect_name_table + name_offset).into())
-                    .unwrap_or("<ERROR>".to_string());
+                let name = util::read_str_at(&mut f, (effect_name_table + name_offset).into())?;
 
                 f.seek(SeekFrom::Start(pos))?;
-                emitters.push(Emitter {
-                    unk_data,
-                    unknown_offset,
-                    name,
-                })
+                emitters.push(Emitter { unk_data, name })
             }
             f.seek(SeekFrom::Start(pos))?;
 
@@ -179,6 +174,7 @@ impl EffectFile {
             version: version,
             unk,
             emitter_sets,
+            textures: vec![],
         };
         Ok(out)
     }
