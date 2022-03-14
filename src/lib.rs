@@ -82,25 +82,16 @@ impl EffectFile {
         let other_offsets: Option<SwitchToolboxUnusedOffsets>;
         let unk: Option<u64>;
         if version > 0xB {
-            let shader_gtx_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let shader_gtx_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let keyanim_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let keyanim_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let primative_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let primative_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let shader_param_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let shader_param_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let texture_tab_total_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
             other_offsets = Some(SwitchToolboxUnusedOffsets {
-                shader_gtx_tab_pos,
-                shader_gtx_tab_size,
-                keyanim_tab_pos,
-                keyanim_tab_size,
-                primative_tab_pos,
-                primative_tab_size,
-                shader_param_tab_pos,
-                shader_param_tab_size,
-                texture_tab_total_size,
+                shader_gtx_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                shader_gtx_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                keyanim_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                keyanim_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                primative_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                primative_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                shader_param_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                shader_param_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                texture_tab_total_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
             });
             unk = Some(u64::read_from(&mut f, ByteOrder::LittleEndian)?);
         } else {
@@ -122,11 +113,9 @@ impl EffectFile {
 
             let pos = f.stream_position()?;
             f.seek(SeekFrom::Start(emitter_table_pos.into()))?;
-            println!("g{:#X}", emitter_table_pos);
             let mut emitters = vec![];
             for _ in 0..emitter_count {
                 let emitter_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-                println!("{:#X}", emitter_pos);
                 u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
 
                 let pos = f.stream_position()?;
