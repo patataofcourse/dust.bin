@@ -14,6 +14,20 @@ pub struct EffectFile {
     pub unk: Option<u64>,
     pub emitter_sets: Vec<EmitterSet>,
     pub textures: Vec<Texture>,
+    pub other_offsets: Option<SwitchToolboxUnusedOffsets>,
+}
+
+#[derive(Debug)]
+pub struct SwitchToolboxUnusedOffsets {
+    pub shader_gtx_tab_pos: u32,
+    pub shader_gtx_tab_size: u32,
+    pub keyanim_tab_pos: u32,
+    pub keyanim_tab_size: u32,
+    pub primative_tab_pos: u32,
+    pub primative_tab_size: u32,
+    pub shader_param_tab_pos: u32,
+    pub shader_param_tab_size: u32,
+    pub texture_tab_total_size: u32,
 }
 
 #[derive(Debug)]
@@ -65,56 +79,34 @@ impl EffectFile {
         let texture_table_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
 
         // "Fun" part - stuff that depends on version
-        let shader_gtx_tab_pos = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
+        let other_offsets: Option<SwitchToolboxUnusedOffsets>;
+        let unk: Option<u64>;
+        if version > 0xB {
+            let shader_gtx_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let shader_gtx_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let keyanim_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let keyanim_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let primative_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let primative_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let shader_param_tab_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let shader_param_tab_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            let texture_tab_total_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            other_offsets = Some(SwitchToolboxUnusedOffsets {
+                shader_gtx_tab_pos,
+                shader_gtx_tab_size,
+                keyanim_tab_pos,
+                keyanim_tab_size,
+                primative_tab_pos,
+                primative_tab_size,
+                shader_param_tab_pos,
+                shader_param_tab_size,
+                texture_tab_total_size,
+            });
+            unk = Some(u64::read_from(&mut f, ByteOrder::LittleEndian)?);
         } else {
-            None
-        };
-        let shader_gtx_tab_size = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let keyanim_tab_pos = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let keyanim_tab_size = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let primative_tab_pos = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let primative_tab_size = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let shader_param_tab_pos = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let shader_param_tab_size = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let texture_tab_total_size = if version > 0xB {
-            Some(u32::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
-        let unk = if version > 0xB {
-            Some(u64::read_from(&mut f, ByteOrder::LittleEndian)?)
-        } else {
-            None
-        };
+            other_offsets = None;
+            unk = None;
+        }
 
         let mut emitter_sets = vec![];
         // Emitter sets
@@ -175,6 +167,7 @@ impl EffectFile {
             unk,
             emitter_sets,
             textures: vec![],
+            other_offsets,
         };
         Ok(out)
     }
