@@ -1,20 +1,21 @@
 use bytestream::{ByteOrder, StreamReader};
 use std::{
     fs::File,
-    io::{self, Seek, SeekFrom},
+    io::{self, Read, Seek, SeekFrom},
     path::PathBuf,
 };
 
 mod etc_dec;
 mod util;
 
+#[derive(Debug)]
 pub struct EffectFile {
     pub version: u32,
     pub unk: Option<u64>,
     pub emitter_sets: Vec<EmitterSet>,
-    pub texture_folder: Vec<Texture>,
 }
 
+#[derive(Debug)]
 pub struct EmitterSet {
     pub name: String,
     pub unk1: u32,
@@ -24,16 +25,20 @@ pub struct EmitterSet {
     pub emitters: Vec<Emitter>,
 }
 
+#[derive(Debug)]
 pub struct Emitter {
+    pub name: String,
     pub unknown_offset: u32,
-    pub unk: EmitterUnknownData, // Switch Toolbox ignores this
+    pub unk_data: EmitterUnknownData, // Switch Toolbox ignores this
 }
 
+#[derive(Debug)]
 pub enum EmitterUnknownData {
     Old([u8; 0xC]),
     New([u8; 0x38]),
 }
 
+#[derive(Debug)]
 pub struct Texture {}
 
 impl EffectFile {
@@ -124,13 +129,38 @@ impl EffectFile {
             let unk2 = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
 
             let pos = f.stream_position()?;
-            f.seek(SeekFrom::Start(emitter_table_pos as u64))?;
+            f.seek(SeekFrom::Start(emitter_table_pos.into()))?;
             let mut emitters = vec![];
             for _ in 0..emitter_count {
                 let emitter_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
                 u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
                 let unknown_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
                 u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
+
+                let pos = f.stream_position()?;
+                f.seek(SeekFrom::Start(emitter_pos.into()))?;
+
+                let unk_data: EmitterUnknownData;
+                if version <= 0xB {
+                    let mut data = [0; 0xC];
+                    f.read(&mut data)?;
+                    unk_data = EmitterUnknownData::Old(data);
+                } else {
+                    let mut data = [0; 0x38];
+                    f.read(&mut data)?;
+                    unk_data = EmitterUnknownData::New(data);
+                }
+
+                let name_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+                let name = util::read_str_at(&mut f, (effect_name_table + name_offset).into())
+                    .unwrap_or("ERROR".to_string());
+
+                f.seek(SeekFrom::Start(pos))?;
+                emitters.push(Emitter {
+                    unk_data,
+                    unknown_offset,
+                    name,
+                })
             }
             f.seek(SeekFrom::Start(pos))?;
 
@@ -145,11 +175,12 @@ impl EffectFile {
         }
         println!();
 
-        Ok(Self {
+        let out = Self {
             version: version,
             unk,
             emitter_sets,
-            texture_folder: vec![],
-        })
+        };
+        println!("{:#?}", out);
+        Ok(out)
     }
 }
