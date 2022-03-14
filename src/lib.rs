@@ -153,7 +153,7 @@ impl EffectFile {
 
                 let name_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
                 let name = util::read_str_at(&mut f, (effect_name_table + name_offset).into())
-                    .unwrap_or("ERROR".to_string());
+                    .unwrap_or("<ERROR>".to_string());
 
                 f.seek(SeekFrom::Start(pos))?;
                 emitters.push(Emitter {
@@ -180,7 +180,6 @@ impl EffectFile {
             unk,
             emitter_sets,
         };
-        println!("{:#?}", out);
         Ok(out)
     }
 }
