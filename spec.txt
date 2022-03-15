@@ -1,9 +1,11 @@
+* "Name offset" refers to the offset _inside_ the effect name table
+
 Header:
 
 0x00 - 4 bytes - Magic/signature (SPBD in our case)
 0x04 - u32 - Version (0x33 in our case)
 0x08 - u32 - Number of emitter sets
-0x0C - u32 - Name position (usually 0x00 or "no name")
+0x0C - u32 - Name offset * (usually 0x00 or "no name")
 0x10 - u32 - Offset to name table
 0x14 - u32 - Offset to texture block table
 0x18 - u32 - Size of texture block table
@@ -25,7 +27,7 @@ Emitter sets (per set):
 
 0x00 - u32 - Description
 0x04 - u32 - Unknown
-0x08 - u32 - Name offset (inside the effect name table)
+0x08 - u32 - Name offset *
 0x0C - u32 - Name pointer
 0x10 - u32 - Number of emitters
 0x14 - u32 - Offset to emitter table
@@ -37,7 +39,7 @@ Emitter table - repeat per emitter:
 
 Emitter:
 0x00 - 56 bytes of data that Switch Toolbox ignores (12 bytes in versions before 0xB)
-0x38 - u32 - Name offset (inside the effect name table)
+0x38 - u32 - Name offset *
 0x3C - u32 - Padding
 0x40 - u32 - Texture data starts here
 
