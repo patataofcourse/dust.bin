@@ -6,7 +6,10 @@ use std::{
 };
 
 mod etc_dec;
+mod format;
 mod util;
+
+use format::texture::Texture;
 
 static SUPPORTED_VERSIONS: [u32; 2] = [0xB, 0x33];
 
@@ -38,7 +41,6 @@ pub struct SwitchToolboxUnusedOffsets {
 pub struct EmitterSet {
     pub name: String,
     pub unk1: u32,
-    pub unk2: u32,
     pub description: u32,
     pub name_pointer: u32,
     pub emitters: Vec<Emitter>,
@@ -55,9 +57,6 @@ pub enum EmitterUnknownData {
     Old([u8; 0xC]),
     New([u8; 0x38]),
 }
-
-#[derive(Debug)]
-pub struct Texture {}
 
 impl EffectFile {
     pub fn from_file(fname: PathBuf) -> anyhow::Result<Self> {
@@ -109,10 +108,10 @@ impl EffectFile {
             let unk1 = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
             let name_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
             let name = util::read_str_at(&mut f, (effect_name_table + name_offset) as u64)?;
-            let name_pointer = u32::read_from(&mut f, ByteOrder::LittleEndian)?; //Only used in non-SPBD according to Switch Toolbox
+            let name_pointer = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
             let emitter_count = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
             let emitter_table_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-            let unk2 = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+            u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
 
             let pos = f.stream_position()?;
             f.seek(SeekFrom::Start(emitter_table_pos.into()))?;
@@ -147,7 +146,6 @@ impl EffectFile {
             emitter_sets.push(EmitterSet {
                 name,
                 unk1,
-                unk2,
                 description,
                 name_pointer,
                 emitters,

@@ -1,3 +1,6 @@
+PTCL file specification
+Shamelessly ripped (partially) from Switch Toolbox source code
+
 * "Name offset" refers to the offset _inside_ the effect name table
 
 Header:
@@ -10,7 +13,7 @@ Header:
 0x14 - u32 - Offset to texture block table
 0x18 - u32 - Size of texture block table
 
-Extra info in header (versions 0xB onwards):
+Extra info in header (versions after 0xB):
 0x1C - u32 - Offset to shader gtx table
 0x20 - u32 - Size of shader gtx table
 0x24 - u32 - Offset to key animation table
@@ -25,13 +28,13 @@ Extra info in header (versions 0xB onwards):
 
 Emitter sets (per set):
 
-0x00 - u32 - Description
+0x00 - u32 - Description (seemingly unused / always 0)
 0x04 - u32 - Unknown
 0x08 - u32 - Name offset *
-0x0C - u32 - Name pointer
+0x0C - u32 - Name pointer (seemingly unused / always 0)
 0x10 - u32 - Number of emitters
 0x14 - u32 - Offset to emitter table
-0x18 - u32 - Unknown
+0x18 - u32 - Unknown (seemingly padding)
 
 Emitter table - repeat per emitter:
 0x00 - u32 - Offset to emitter
@@ -41,6 +44,42 @@ Emitter:
 0x00 - 56 bytes of data that Switch Toolbox ignores (12 bytes in versions before 0xB)
 0x38 - u32 - Name offset *
 0x3C - u32 - Padding
-0x40 - u32 - Texture data starts here
+0x40 - n bytes - Texture data
+Anything after that is undocumented
 
-(this is where things get a lil weird)
+Texture data:
+- Each version has a different amount of textures per emitter:
+   * "Old" versions (0xB and lower)  - 1
+   * "New" versions (0xC and higher) - 2
+- Format for the texture data also changes depending on version
+
+Texture - old:
+0x00 - u16 - Width
+0x02 - u16 - Height
+0x04 - u16 - Format (to be documented)
+0x06 - u16 - Unknown
+0x08 - u32 - Unknown
+0x0C - u32 - Image size (like the size of the data I guess??)
+0x10 - u32 - Offset of image data inside the texture table
+0x14 - u64 - Unknown
+
+Texture - new:
+    Note: I have no idea what half of these mean
+0x00 - u16 - Width
+0x02 - u16 - Height
+0x04 - u32 - Swizzle
+0x08 - u32 - Alignment
+0x0C - u32 - Pitch
+0x10 - u8 - Wrap mode (11 = repeat, 22 = mirror)
+0x11 - 3 bytes - Unknown
+0x14 - u32 - mipCount
+0x18 - u32 - CompSel
+0x1C - u32 * 0xD - MipOffsets
+0x50 - u32 * 4 - Unknown
+0x60 - u32 - Original data format
+0x64 - u32 - Original data position
+0x68 - u32 - Original data size
+0x6C - u32 - Format (to be documented, seems the same as BFLIM formats)
+0x70 - u32 - Image size (like the size of the data I guess??)
+0x74 - u32 - Offset of image data inside the texture table
+0x78 - u32 - Handle
