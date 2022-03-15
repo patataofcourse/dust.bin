@@ -39,7 +39,8 @@ pub enum SurfaceFormatOld {
 #[derive(Debug)]
 pub enum SurfaceFormatNew {
     INVALID = 0x0,
-    TCS_R8_G8_B8_A8 = 2,
+    TCS_RGB8 = 1,
+    TCS_RGBA8 = 2,
     T_BC1_UNORM = 3,
     T_BC1_SRGB = 4,
     T_BC2_UNORM = 5,
