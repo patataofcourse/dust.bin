@@ -11,7 +11,24 @@ pub enum Texture {
         unk3: u64,
     },
     New {
+        width: u16,
+        height: u16,
+        swizzle: u32,
+        alignment: u32,
+        pitch: u32,
+        wrap_mode: u8,
+        unk1: [u8; 3],
+        mip_count: u32,
+        comp_sel: u32,
+        mip_offsets: [u32; 0xD],
+        unk2: u128,
+        original_format: SurfaceFormatNew,
+        original_pos: u32,
+        original_size: u32,
         format: SurfaceFormatNew, // Shut it with the warnings, rustc
+        data_pos: u32,
+        data_size: u32,
+        handle: u32,
     },
 }
 
