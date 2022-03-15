@@ -3,22 +3,23 @@ Header:
 0x00 - 4 bytes - Magic/signature (SPBD in our case)
 0x04 - u32 - Version (0x33 in our case)
 0x08 - u32 - Number of emitter sets
-0x0C - u32 - Padding??
-0x10 - u32 - Offset to effect name table
+0x0C - u32 - Name position (usually 0x00 or "no name")
+0x10 - u32 - Offset to name table
 0x14 - u32 - Offset to texture block table
 0x18 - u32 - Size of texture block table
 
 Extra info in header (versions 0xB onwards):
-0x1C - u32 - Offset to "shader gtx table"
-0x20 - u32 - Size of "shader gtx table"
+0x1C - u32 - Offset to shader gtx table
+0x20 - u32 - Size of shader gtx table
 0x24 - u32 - Offset to key animation table
 0x28 - u32 - Size of key animation table
-0x2C - u32 - Offset to "primative table"
-0x30 - u32 - Size of "primative table"
+0x2C - u32 - Offset to primitive table
+0x30 - u32 - Size of primitive table
 0x34 - u32 - Offset to shader parameter table
 0x38 - u32 - Size of shader parameter table
-0x3C - u32 - Total size of the texture table
-0x40 - u64 - Unknown
+0x3C - u32 - Total size of the textures
+0x40 - u32 - Total size of the shaders
+0x44 - u32 - Total size of the emitters
 
 Emitter sets (per set):
 
@@ -33,13 +34,11 @@ Emitter sets (per set):
 Emitter table - repeat per emitter:
 0x00 - u32 - Offset to emitter
 0x04 - u32 - Padding
-0x08 - u32 - Unknown offset
-0x0C - u32 - Padding
 
 Emitter:
 0x00 - 56 bytes of data that Switch Toolbox ignores (12 bytes in versions before 0xB)
 0x38 - u32 - Name offset (inside the effect name table)
 0x3C - u32 - Padding
-0x40 - u32 - Texture data start here
+0x40 - u32 - Texture data starts here
 
 (this is where things get a lil weird)

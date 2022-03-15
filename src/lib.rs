@@ -8,10 +8,12 @@ use std::{
 mod etc_dec;
 mod util;
 
+static SUPPORTED_VERSIONS: [u32; 2] = [0xB, 0x33];
+
 #[derive(Debug)]
 pub struct EffectFile {
+    pub name: String,
     pub version: u32,
-    pub unk: Option<u64>,
     pub emitter_sets: Vec<EmitterSet>,
     pub textures: Vec<Texture>,
     pub other_offsets: Option<SwitchToolboxUnusedOffsets>,
@@ -23,11 +25,13 @@ pub struct SwitchToolboxUnusedOffsets {
     pub shader_gtx_tab_size: u32,
     pub keyanim_tab_pos: u32,
     pub keyanim_tab_size: u32,
-    pub primative_tab_pos: u32,
-    pub primative_tab_size: u32,
+    pub primitive_tab_pos: u32,
+    pub primitive_tab_size: u32,
     pub shader_param_tab_pos: u32,
     pub shader_param_tab_size: u32,
-    pub texture_tab_total_size: u32,
+    pub texture_total_size: u32,
+    pub shader_total_size: u32,
+    pub emitter_total_size: u32,
 }
 
 #[derive(Debug)]
@@ -61,42 +65,41 @@ impl EffectFile {
 
         let magic = util::read_str_sized::<4>(&mut f)?;
         if magic != "SPBD" {
-            println!("Not an SPBD PTCL file");
+            eprintln!("Not an SPBD PTCL file");
             Err(io::Error::from(io::ErrorKind::Other))?;
         }
         let version = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
         println!("Version {:#X} ", version);
-        if version <= 0xB {
+        if !SUPPORTED_VERSIONS.contains(&version) {
             println!("Warning: version might not be fully supported")
         }
 
         //now here comes a bunch of data we can't use yet
         let emitter_count = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-        let header_padding = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
-        println!(" header padding: {:#010X}", header_padding);
+        let name_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
         let effect_name_table = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
+        let name = util::read_str_at(&mut f, (name_pos + effect_name_table).into())?;
         let texture_table_pos = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
         let texture_table_size = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
 
         // "Fun" part - stuff that depends on version
         let other_offsets: Option<SwitchToolboxUnusedOffsets>;
-        let unk: Option<u64>;
         if version > 0xB {
             other_offsets = Some(SwitchToolboxUnusedOffsets {
                 shader_gtx_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
                 shader_gtx_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
                 keyanim_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
                 keyanim_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
-                primative_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
-                primative_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                primitive_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                primitive_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
                 shader_param_tab_pos: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
                 shader_param_tab_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
-                texture_tab_total_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                texture_total_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                shader_total_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
+                emitter_total_size: u32::read_from(&mut f, ByteOrder::LittleEndian)?,
             });
-            unk = Some(u64::read_from(&mut f, ByteOrder::LittleEndian)?);
         } else {
             other_offsets = None;
-            unk = None;
         }
 
         let mut emitter_sets = vec![];
@@ -134,6 +137,7 @@ impl EffectFile {
 
                 let name_offset = u32::read_from(&mut f, ByteOrder::LittleEndian)?;
                 let name = util::read_str_at(&mut f, (effect_name_table + name_offset).into())?;
+                u32::read_from(&mut f, ByteOrder::LittleEndian)?; // padding
 
                 f.seek(SeekFrom::Start(pos))?;
                 emitters.push(Emitter { unk_data, name })
@@ -149,11 +153,10 @@ impl EffectFile {
                 emitters,
             })
         }
-        println!();
 
         let out = Self {
-            version: version,
-            unk,
+            name,
+            version,
             emitter_sets,
             textures: vec![],
             other_offsets,
