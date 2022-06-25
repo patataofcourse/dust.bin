@@ -41,22 +41,26 @@ Emitter table - repeat per emitter:
 0x04 - u32 - Padding
 
 Emitter:
-0x00 - 56 bytes of data that Switch Toolbox ignores (12 bytes in versions before 0xB)
+0x00 - u32 - Emitter type?
+0x04 - 0x34 - Unknown
 0x38 - u32 - Name offset *
 0x3C - u32 - Padding
-0x40 - n bytes - Texture data
+0x40 - n bytes - Texture data (see section below for size of n)
 Anything after that is undocumented
 
 Texture data:
 - Each version has a different amount of textures per emitter:
-   * "Old" versions (0xB and lower)  - 1
-   * "New" versions (0xC and higher) - 2
+    * "Old" versions (0xB and lower)  - 1
+    * "New" versions (0xC and higher) - 2
 - Format for the texture data also changes depending on version
+- This means that the total size of the texture data is:
+    * 0x18 bytes in the "old" versions
+    * 0xF8 bytes in the "new" versions
 
 Texture - old:
 0x00 - u16 - Width
 0x02 - u16 - Height
-0x04 - u16 - Format (to be documented)
+0x04 - u16 - Format (see src/format/texture.rs)
 0x06 - u16 - Unknown
 0x08 - u32 - Unknown
 0x0C - u32 - Image size (like the size of the data I guess??)
@@ -79,7 +83,7 @@ Texture - new:
 0x60 - u32 - Original data format
 0x64 - u32 - Original data position
 0x68 - u32 - Original data size
-0x6C - u32 - Format (to be documented, seems the same as BFLIM formats)
+0x6C - u32 - Format (see src/format/texture.rs)
 0x70 - u32 - Image size (like the size of the data I guess??)
 0x74 - u32 - Offset of image data inside the texture table
 0x78 - u32 - Handle
